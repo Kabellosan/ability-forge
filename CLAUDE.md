@@ -32,6 +32,6 @@ The extractor checks itself against the Book of Magic's index. Remaining report 
 
 ## Open threads (2026-09-30)
 
-- Captain to rule on three slot groups: summoned servants, always-on abilities (suggested: untrainable), spell modifiers (suggested: Either).
+- Training slots fully classified (2026-09-30): nothing undecided.
 - Player visibility beyond the sealed cards still being workshopped on the prototype (https://claude.ai/artifact/UvV2pUYQshFGYFyDgp9Q2W).
 - Foundry build not started. Environment will match Terrain Forge: Foundry v14, Dragonbane system 4.1.1 on Sqyre, manifest-URL installs. Heroic abilities are `ability` items with `abilityType: "heroic"` and a free-text `requirement`.
