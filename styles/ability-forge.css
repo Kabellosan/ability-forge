@@ -1,0 +1,142 @@
+/* Ability Forge — a Skyrim-style sky of heroic abilities and spells.
+   The window follows Foundry's theme; the sky itself is night in both, on purpose. */
+
+.ability-forge {
+  --af-paper: #1b1f26; --af-panel: #22272f; --af-ink: #e7e5dc; --af-muted: #9aa1aa; --af-line: #353c46;
+  --af-accent: #e2654c; --af-avail: #5cc4a6; --af-avail-bg: #173229; --af-close: #e3ab45; --af-close-bg: #33291a; --af-locked: #6c737c;
+  --af-sky1: #070b18; --af-sky2: #18223f; --af-sky-line: rgba(168, 188, 240, .30); --af-sky-text: #d3dbf0; --af-sky-dim: #6a7592;
+  --af-star-owned: #fff0b3; --af-star-avail: #a6e0ff; --af-star-close: #e8c56c; --af-star-locked: #49536f; --af-star-plain: #dfe6ff; --af-hot: #ff9b7a;
+  --af-display: "Modesto Condensed", "Signika", Palatino, Georgia, serif;
+  --af-body: "Signika", "Gill Sans", system-ui, sans-serif;
+}
+body.theme-light .ability-forge, .ability-forge.theme-light {
+  --af-paper: #eceee7; --af-panel: #f8f8f4; --af-ink: #1b2027; --af-muted: #5d6570; --af-line: #c7cbc1;
+  --af-accent: #a3301d; --af-avail: #1d6b58; --af-avail-bg: #dcece5; --af-close: #9a6508; --af-close-bg: #f3e7cc; --af-locked: #8a9098;
+}
+
+.ability-forge .window-content { padding: 0; display: flex; flex-direction: column; background: var(--af-paper); color: var(--af-ink); font-family: var(--af-body); overflow: hidden; }
+.ability-forge button { font-family: inherit; }
+
+/* bar */
+.ability-forge .af-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--af-line); }
+.ability-forge .af-bar select, .ability-forge .af-bar input[type=search] { width: auto; min-width: 180px; height: 28px; background: var(--af-panel); color: var(--af-ink); border: 1px solid var(--af-line); border-radius: 5px; padding: 0 8px; }
+.ability-forge .af-spacer { flex: 1; }
+.ability-forge .af-seg { display: inline-flex; border: 1px solid var(--af-line); border-radius: 5px; overflow: hidden; }
+.ability-forge .af-seg button, .ability-forge .af-toggle, .ability-forge .af-icon {
+  all: unset; cursor: pointer; padding: 4px 11px; font-size: 13px; color: var(--af-ink); background: var(--af-panel); line-height: 20px; }
+.ability-forge .af-seg button + button { border-left: 1px solid var(--af-line); }
+.ability-forge .af-seg button[aria-pressed=true], .ability-forge .af-toggle[aria-pressed=true] { background: var(--af-ink); color: var(--af-paper); }
+.ability-forge .af-toggle, .ability-forge .af-icon { border: 1px solid var(--af-line); border-radius: 5px; }
+.ability-forge :focus-visible { outline: 2px solid var(--af-accent); outline-offset: 2px; }
+
+/* constellation strip */
+.ability-forge .af-strip { display: flex; gap: 2px; overflow-x: auto; padding: 0 10px; border-bottom: 1px solid var(--af-line); flex: none; }
+.ability-forge .af-strip button { all: unset; cursor: pointer; padding: 7px 10px 6px; white-space: nowrap; font: 600 14px var(--af-display); color: var(--af-muted);
+  border-bottom: 2px solid transparent; display: inline-flex; gap: 6px; align-items: center; }
+.ability-forge .af-strip button[aria-selected=true] { color: var(--af-ink); border-bottom-color: var(--af-accent); }
+.ability-forge .af-n { font: 700 11px var(--af-body); background: var(--af-avail-bg); color: var(--af-avail); border-radius: 9px; padding: 0 6px; }
+.ability-forge .af-sep { width: 1px; background: var(--af-line); margin: 8px 6px; flex: none; }
+
+/* chips */
+.ability-forge .af-chips { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; padding: 6px 12px; flex: none; }
+.ability-forge .af-lbl { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--af-muted); margin: 0 2px 0 8px; }
+.ability-forge .af-lbl:first-child { margin-left: 0; }
+.ability-forge .af-chip { all: unset; cursor: pointer; border: 1px solid var(--af-line); background: var(--af-panel); border-radius: 12px; padding: 1px 9px; font-size: 12px; }
+.ability-forge .af-chip[aria-pressed=false] { opacity: .45; text-decoration: line-through; }
+.ability-forge .af-legend { display: flex; flex-wrap: wrap; gap: 5px; }
+.ability-forge .af-legend .af-chip { cursor: default; }
+.ability-forge .af-chip.af-s-owned { background: var(--af-ink); color: var(--af-paper); }
+.ability-forge .af-chip.af-s-available { background: var(--af-avail-bg); color: var(--af-avail); border-color: var(--af-avail); }
+.ability-forge .af-chip.af-s-close { background: var(--af-close-bg); color: var(--af-close); border-style: dashed; border-color: var(--af-close); }
+.ability-forge .af-chip.af-s-locked { color: var(--af-locked); }
+
+/* body */
+.ability-forge .af-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 330px; }
+.ability-forge .af-stage { overflow: auto; min-width: 0; }
+.ability-forge .af-detail { overflow: auto; border-left: 1px solid var(--af-line); padding: 12px 14px; display: flex; flex-direction: column; gap: 9px; background: var(--af-panel); font-size: 14px; }
+.ability-forge .af-detail h2 { margin: 0; border: 0; font: 700 22px/1.15 var(--af-display); }
+.ability-forge .af-detail h4 { margin: 4px 0 0; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--af-muted); }
+.ability-forge .af-detail p { margin: 0; }
+.ability-forge .af-detail ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 2px; }
+.ability-forge .af-detail dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; margin: 0; font-size: 13px; }
+.ability-forge .af-detail dt { color: var(--af-muted); }
+.ability-forge .af-detail dd { margin: 0; }
+.ability-forge .af-kicker { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--af-accent); }
+.ability-forge .af-rules { line-height: 1.5; white-space: pre-line; }
+.ability-forge .af-verdict { padding: 5px 9px; border-radius: 5px; font-size: 13px; }
+.ability-forge .af-verdict.af-s-owned { background: var(--af-ink); color: var(--af-paper); }
+.ability-forge .af-verdict.af-s-available { background: var(--af-avail-bg); color: var(--af-avail); }
+.ability-forge .af-verdict.af-s-close { background: var(--af-close-bg); color: var(--af-close); }
+.ability-forge .af-verdict.af-s-locked { background: var(--af-paper); color: var(--af-muted); }
+.ability-forge .af-ok { color: var(--af-avail); font-weight: 700; }
+.ability-forge .af-no { color: var(--af-accent); font-weight: 700; }
+.ability-forge .af-link { all: unset; cursor: pointer; text-decoration: underline; text-decoration-color: var(--af-line); text-underline-offset: 3px; }
+.ability-forge .af-meta { color: var(--af-muted); font-size: 12px; }
+.ability-forge .af-gmnote { font-size: 12px; color: var(--af-muted); white-space: pre-wrap; border-top: 1px dashed var(--af-line); padding-top: 8px; }
+.ability-forge .af-empty { color: var(--af-muted); padding: 4px 0; }
+.ability-forge .af-message { padding: 40px; max-width: 520px; margin: auto; text-align: center; display: grid; gap: 12px; }
+
+/* sky */
+.ability-forge .af-sky { position: relative; min-height: 100%; background: radial-gradient(ellipse at 50% 110%, var(--af-sky2), var(--af-sky1) 70%); color: var(--af-sky-text); }
+.ability-forge .af-sky svg { display: block; width: 100%; height: auto; }
+.ability-forge .af-bgstar { fill: #fff; }
+.ability-forge .af-tier { fill: var(--af-sky-dim); font: 11px var(--af-body); }
+.ability-forge .af-edge { fill: none; stroke: var(--af-sky-line); stroke-width: 1.3; }
+.ability-forge .af-root-line { stroke-dasharray: 2 5; }
+.ability-forge .af-dash { stroke-dasharray: 6 5; }
+.ability-forge .af-edge.af-lit { stroke: var(--af-star-owned); opacity: .75; }
+.ability-forge .af-edge.af-hot { stroke: var(--af-hot); stroke-width: 2; opacity: 1; }
+.ability-forge .af-edge.af-dim { opacity: .12; }
+.ability-forge .af-star { cursor: pointer; outline: none; }
+.ability-forge .af-star text { fill: var(--af-sky-text); font: 500 12px var(--af-body); text-anchor: middle; paint-order: stroke; stroke: var(--af-sky1); stroke-width: 3px; }
+.ability-forge .af-core, .ability-forge .af-halo { fill: var(--af-star-plain); }
+.ability-forge .af-halo { opacity: .22; }
+.ability-forge .af-s-owned .af-core, .ability-forge .af-s-owned .af-halo { fill: var(--af-star-owned); }
+.ability-forge .af-star.af-s-owned .af-halo { opacity: .45; }
+.ability-forge .af-star.af-s-owned text { fill: var(--af-star-owned); font-weight: 700; }
+.ability-forge .af-s-available .af-core, .ability-forge .af-s-available .af-halo { fill: var(--af-star-avail); }
+.ability-forge .af-star.af-s-close .af-core { fill: var(--af-sky1); stroke: var(--af-star-close); stroke-width: 1.6; }
+.ability-forge .af-star.af-s-close .af-halo { fill: var(--af-star-close); opacity: .12; }
+.ability-forge .af-star.af-s-locked .af-core { fill: var(--af-star-locked); }
+.ability-forge .af-star.af-s-locked .af-halo { opacity: 0; }
+.ability-forge .af-star.af-s-locked text { fill: var(--af-sky-dim); }
+.ability-forge .af-star.af-sealed text { font-style: italic; fill: var(--af-sky-dim); }
+.ability-forge .af-ring { fill: none; stroke: var(--af-hot); stroke-width: 1.8; opacity: 0; }
+.ability-forge .af-star.af-sel .af-ring, .ability-forge .af-star:focus-visible .af-ring { opacity: 1; }
+.ability-forge .af-star.af-faded { opacity: .22; }
+.ability-forge .af-star.af-dimstar { opacity: .3; }
+.ability-forge .af-root text { fill: var(--af-sky-dim); font: 700 11px var(--af-body); letter-spacing: .08em; text-transform: uppercase; text-anchor: middle; }
+.ability-forge .af-root .af-v { fill: var(--af-sky-text); letter-spacing: 0; }
+.ability-forge .af-root path { fill: none; stroke: var(--af-sky-dim); stroke-width: 1.4; }
+.ability-forge .af-cap { position: sticky; bottom: 0; display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 10px; padding: 8px 12px 12px;
+  background: linear-gradient(to top, var(--af-sky1) 55%, transparent); }
+.ability-forge .af-cap-name { text-align: center; }
+.ability-forge .af-cap h2 { margin: 0; border: 0; font: 700 30px/1 var(--af-display); letter-spacing: .06em; color: #f1f3fb; }
+.ability-forge .af-cap p { margin: 4px 0 0; font-size: 13px; color: var(--af-sky-text); }
+.ability-forge .af-cap button { all: unset; cursor: pointer; color: var(--af-sky-dim); font: 600 15px var(--af-display); padding: 6px 4px; }
+.ability-forge .af-cap button:hover { color: var(--af-sky-text); }
+.ability-forge .af-prev { justify-self: start; }
+.ability-forge .af-next { justify-self: end; }
+@media (prefers-reduced-motion: no-preference) {
+  .ability-forge .af-sky svg.af-turn-l { animation: af-turn-l .28s ease-out; }
+  .ability-forge .af-sky svg.af-turn-r { animation: af-turn-r .28s ease-out; }
+}
+@keyframes af-turn-l { from { opacity: 0; transform: translateX(-36px); } }
+@keyframes af-turn-r { from { opacity: 0; transform: translateX(36px); } }
+
+/* cards: rules text always on the face; uneven heights, so columns */
+.ability-forge .af-cards { columns: 260px; column-gap: 10px; padding: 12px; }
+.ability-forge .af-card { break-inside: avoid; margin: 0 0 10px; display: grid; gap: 5px; padding: 10px 12px; border: 1px solid var(--af-line); border-radius: 6px; background: var(--af-panel); cursor: pointer; }
+.ability-forge .af-card h3 { margin: 0; border: 0; font: 700 17px var(--af-display); }
+.ability-forge .af-card .af-req { margin: 0; font-size: 12px; color: var(--af-muted); }
+.ability-forge .af-card .af-text { margin: 0; font-size: 13px; line-height: 1.45; white-space: pre-line; }
+.ability-forge .af-card .af-foot { margin: 0; display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--af-muted); }
+.ability-forge .af-card.af-s-owned { border-color: var(--af-star-owned); box-shadow: inset 0 0 0 1px var(--af-star-owned); }
+.ability-forge .af-card.af-s-available { border-color: var(--af-avail); }
+.ability-forge .af-card.af-s-close { border-style: dashed; border-color: var(--af-close); }
+.ability-forge .af-card.af-s-locked { opacity: .65; }
+.ability-forge .af-card.af-sel { outline: 2px solid var(--af-accent); }
+.ability-forge .af-card.af-sealed h3 { font-style: italic; color: var(--af-muted); }
+
+/* Actors sidebar button */
+.af-open { flex: 1; }

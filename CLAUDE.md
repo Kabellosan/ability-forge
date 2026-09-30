@@ -30,8 +30,22 @@ Book text came from NotebookLM notebook "DBV Max" (`f3f4b3cd`): `notebooklm sour
 
 The extractor checks itself against the Book of Magic's index. Remaining report lines are real book faults, not parser bugs: Dimensional Travel's prerequisite is missing its first half; typos WARDING MAR and INVIGORATING CONCOCTION are auto-resolved. Demonsmith is named in the book but never defined (a stub on the map).
 
+## Foundry module (v0.1.0, 2026-09-30)
+
+- `scripts/lib.mjs` – pure logic: `createAtlas(catalogue)` → `profileFrom(sheetSummary)`, `render(ctx)` (strip, chips, sky SVG, cards, detail as HTML strings). No Foundry globals. Ported from the prototype; classes prefixed `af-` so Foundry's CSS leaves them alone.
+- `scripts/main.mjs` – Foundry glue: settings (*Private catalogue link*, *Players can open*), catalogue fetch (gist API; a truncated file is fetched from its `raw_url`), actor → summary (skill/ability/spell items; kin and profession abilities skipped), ApplicationV2 window, entry points (sheet header, Actors sidebar, `api.open(actor)`), live refresh on actor/item changes.
+- `styles/ability-forge.css` – follows Foundry's theme (`body.theme-light`); the sky is night in both.
+- Tests: `cd tests && node lib.test.mjs && node smoke.test.mjs` (public, invented fixture) and `node private/private.test.mjs` (real catalogue + real characters; lives in the gitignored private/).
+- Catalogue for the module: `python3 tools/build_catalogue.py` → `data/catalogue.json` (full rules text, slots merged). Goes to the secret catalogue gist, never to this repo.
+- Dragonbane 4.1.1 data model (checked in the system source, tag v4.1.1): skills are `skill` items (`system.value`, untrained ones already hold the base chance; schools have `skillType: "magic"`), heroic abilities are `ability` items (`abilityType: "heroic"`), spells are `spell` items (`system.school`, general magic stored as `DoD.spell.general`; rank 0 = trick), attributes at `system.attributes.str.value`.
+
+## Release flow
+
+Same as Terrain Forge and Face Forge: run the tests, bump `version` in module.json and in its `download` URL, push to main. `.github/workflows/release.yml` builds module.zip and publishes the release. The Captain updates the module in Sqyre.
+
 ## Open threads (2026-09-30)
 
 - Training slots fully classified (2026-09-30): nothing undecided.
 - Player visibility beyond the sealed cards still being workshopped on the prototype (https://claude.ai/artifact/UvV2pUYQshFGYFyDgp9Q2W).
-- Foundry build not started. Environment will match Terrain Forge: Foundry v14, Dragonbane system 4.1.1 on Sqyre, manifest-URL installs. Heroic abilities are `ability` items with `abilityType: "heroic"` and a free-text `requirement`.
+- v0.1.0 is only mock-tested; first live test on Sqyre pending. Needs the catalogue gist (Captain creates it on github.com; no gh CLI here).
+- Next: training rings (where to store a training value in Foundry: actor flags vs item flags), then polish from the live test.
