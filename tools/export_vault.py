@@ -212,7 +212,7 @@ def export(campaign):
 
 
 def export_slots(note, entries):
-    """Training Slots note → {id: "combat" | "non-combat" | "either" | None (undecided)}.
+    """Training Slots note → {id: "combat" | "non-combat" | "either" | "untrainable" | None (undecided)}.
 
     Every trainable entry (abilities, and magic that isn't a trick) must appear exactly once.
     """
@@ -239,9 +239,10 @@ def export_slots(note, entries):
         if line.startswith("## "):
             section = line[3:].strip()
             continue
-        if section and "Undecided" in section:
+        if section and ("Undecided" in section or "Not trainable" in section):
             if m := re.match(r"^- \*\*(.+?)\*\* \*\((.+?)\)\*", line):
-                put(m.group(1), m.group(2), None, "Undecided")
+                slot = None if "Undecided" in section else "untrainable"
+                put(m.group(1), m.group(2), slot, section)
             continue
         if m := re.match(r"^\*\*(Combat|Non-combat|Either):\*\*\s*(.*)$", line):
             slot = m.group(1).lower()
@@ -265,8 +266,9 @@ def main():
     if args.slots:
         slots = export_slots(Path(args.slots), entries)
         (OUT / "slots.json").write_text(json.dumps(slots, ensure_ascii=False, indent=1), encoding="utf-8")
-        tally = {k: sum(1 for v in slots.values() if v == k) for k in ("combat", "non-combat", "either", None)}
-        print(f"slots: {tally['combat']} combat, {tally['non-combat']} non-combat, {tally['either']} either, {tally[None]} undecided")
+        tally = {k: sum(1 for v in slots.values() if v == k) for k in ("combat", "non-combat", "either", "untrainable", None)}
+        print(f"slots: {tally['combat']} combat, {tally['non-combat']} non-combat, {tally['either']} either, "
+              f"{tally['untrainable']} not trainable, {tally[None]} undecided")
     OUT.mkdir(exist_ok=True)
     (OUT / "homebrew.json").write_text(json.dumps({"version": 1, "abilities": entries}, ensure_ascii=False, indent=1),
                                        encoding="utf-8")

@@ -13,7 +13,7 @@ Foundry VTT module for Captain's Dragonbane campaign: a map of heroic abilities 
 - **No teachers.** The Book of Magic's school Masters are extracted but not shown (Captain declined).
 - **Book text stays private.** Free League text never enters this repo (public later). `private/` and `data/` are gitignored; the catalogue reaches Foundry via a secret gist, like Terrain Forge's tables. The claude.ai prototype carries stat lines only, never book prose.
 - **The vault is where the Captain writes.** Homebrew abilities come from `Veritapola/Custom-Heroic-Abilities.md` (granted ones' text from the character sheets); training slots from `63 TTRPG Systems/Dragonbane/Dragonbane - Training Slots (Homebrew).md`. Both are mirrored by `tools/export_vault.py`; never hand-edit the JSON.
-- **Training slots:** combat / non-combat / either (fills whichever slot is free; keep it short) / undecided. Tricks are untrainable. Rulings: healing = combat, condition cures = non-combat.
+- **Training slots:** combat / non-combat / either (fills whichever slot is free; keep it short; spell modifiers are Either) / not trainable (always-on abilities: skill 18 or granted) / undecided. Tricks are untrainable. Rulings: healing = combat, condition cures = non-combat.
 - **Book of Magic is beta 3** (Captain: nothing changed in the final).
 
 ## Pipeline

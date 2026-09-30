@@ -224,7 +224,7 @@ const MAGIC_SKILLS = ['Animism','Demonology','Elementalism','Illusionism','Menta
 const ALIAS = { Swim: 'Swimming' };
 const baseChance = a => a <= 5 ? 3 : a <= 8 ? 4 : a <= 12 ? 5 : a <= 15 ? 6 : 7;
 const SOURCE_LABEL = { core: 'Core', 'book-of-magic': 'Book of Magic', homebrew: 'Veritapola', svendsen: 'Svendsen pack' };
-const SLOT_LABEL = { combat: 'Combat', 'non-combat': 'Non-combat', either: 'Either', undecided: 'Undecided' };
+const SLOT_LABEL = { combat: 'Combat', 'non-combat': 'Non-combat', either: 'Either', untrainable: 'Not trainable', undecided: 'Undecided' };
 const STATUS_LABEL = { owned: 'Has it', available: 'Can take now', close: 'Within reach', locked: 'Locked' };
 
 // Example characters come from private/characters.json (never committed).
@@ -616,7 +616,7 @@ function renderDetail() {
     for (const [k, l] of [['requirement', 'Casting needs'], ['castingTime', 'Casting time'], ['range', 'Range'], ['duration', 'Duration'], ['ingredients', 'Ingredients'], ['cost', 'Cost']])
       if (it[k]) dl.push([l, esc(it[k])]);
   }
-  if (it.slot) dl.push(['Training slot', it.slot === 'undecided' ? '<span class="no">Undecided</span>' : it.slot === 'either' ? 'Either: fills whichever slot is free' : SLOT_LABEL[it.slot]]);
+  if (it.slot) dl.push(['Training slot', it.slot === 'undecided' ? '<span class="no">Undecided</span>' : it.slot === 'either' ? 'Either: fills whichever slot is free' : it.slot === 'untrainable' ? 'Not trainable: skill 18 or granted' : SLOT_LABEL[it.slot]]);
   else if (it.kind === 'trick') dl.push(['Training slot', 'None: tricks are not trained']);
   h += `<dl>${dl.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
   // requires
@@ -666,7 +666,7 @@ function render() {
   const sources = [...new Set(items.map(i => i.source))];
   document.getElementById('src-chips').innerHTML = (sources.length > 1 ? `<span class="lbl">Source</span>` + sources.map(s => `<button class="chip" data-chip="src:${s}" aria-pressed="${!S.off.has('src:' + s)}">${esc(SOURCE_LABEL[s] || s)}</button>`).join('') : '')
     + (c && S.viewer === 'gm' ? ` <button class="chip" data-allschools="1" aria-pressed="${!!S.allSchools}" title="GM only: show magic this character cannot use">All magic</button>` : '');
-  const slotsHere = ['combat', 'non-combat', 'either', 'undecided'].filter(k => items.some(i => i.slot === k));
+  const slotsHere = ['combat', 'non-combat', 'either', 'untrainable', 'undecided'].filter(k => items.some(i => i.slot === k));
   document.getElementById('slot-chips').innerHTML = slotsHere.length ? `<span class="lbl">Slot</span>` + slotsHere.map(k => `<button class="chip" data-chip="slot:${k}" aria-pressed="${!S.off.has('slot:' + k)}">${SLOT_LABEL[k]}</button>`).join('') : '';
   document.getElementById('st-chips').innerHTML = c ? `<span class="lbl">Show</span>` + Object.entries(STATUS_LABEL).map(([k, v]) => `<button class="chip" data-chip="st:${k}" aria-pressed="${!S.off.has('st:' + k)}">${v}</button>`).join('') : '';
   document.getElementById('summary').textContent = '';
