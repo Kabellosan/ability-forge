@@ -36,7 +36,7 @@ The extractor checks itself against the Book of Magic's index. Remaining report 
 - `scripts/main.mjs` – Foundry glue: settings (*Private catalogue link*, *Players can open*), catalogue fetch (gist API; a truncated file is fetched from its `raw_url`), actor → summary (skill/ability/spell items; kin and profession abilities skipped), ApplicationV2 window, entry points (sheet header, Actors sidebar, `api.open(actor)`), live refresh on actor/item changes.
 - `styles/ability-forge.css` – follows Foundry's theme (`body.theme-light`); the sky is night in both.
 - Tests: `cd tests && node lib.test.mjs && node smoke.test.mjs` (public, invented fixture) and `node private/private.test.mjs` (real catalogue + real characters; lives in the gitignored private/).
-- Catalogue for the module: `python3 tools/build_catalogue.py` → `data/catalogue.json` (full rules text, slots merged). Goes to the secret catalogue gist, never to this repo.
+- Catalogue for the module: `tools/publish_catalogue.sh` re-exports the vault, builds `catalogue.json` (full rules text, slots merged) into the gist clone `~/ability-forge-catalogue` and pushes. Never to this repo.
 - Dragonbane 4.1.1 data model (checked in the system source, tag v4.1.1): skills are `skill` items (`system.value`, untrained ones already hold the base chance; schools have `skillType: "magic"`), heroic abilities are `ability` items (`abilityType: "heroic"`), spells are `spell` items (`system.school`, general magic stored as `DoD.spell.general`; rank 0 = trick), attributes at `system.attributes.str.value`.
 
 ## Release flow
