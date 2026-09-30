@@ -83,22 +83,53 @@ svg.edges path.dim { opacity: .25; }
 .node.dim { opacity: .28; }
 .node.faded { opacity: .35; }
 
-/* climb: both maps read bottom-up, like a skill tree */
-.climb { display: flex; flex-direction: column; gap: 38px; padding: 14px 16px 20px; }
-.tier { display: grid; gap: 7px; }
-.tier > h3 { margin: 0; font: 700 .95rem var(--display); color: var(--muted); display: flex; gap: 10px; align-items: baseline; }
-.tier > h3 small { font: 400 .8rem var(--body); }
-.tier-row { display: flex; flex-wrap: wrap; gap: 8px 10px; justify-content: center; }
-.tier-row > .node { min-width: 150px; justify-content: space-between; }
-.cluster { border: 1px solid var(--line); border-radius: 6px; padding: 5px 7px 7px; display: grid; gap: 4px; align-content: start; background: var(--panel); position: relative; z-index: 1; }
-.cluster.reached { background: var(--reach); }
-.cluster .cl { font-size: .7rem; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; gap: 10px; }
-.cluster .cl b { font-variant-numeric: tabular-nums; color: var(--ink); letter-spacing: 0; }
-.cluster .in { display: flex; flex-wrap: wrap; gap: 4px; }
-.tree-head { display: flex; flex-wrap: wrap; gap: 4px 18px; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: .9rem; color: var(--muted); }
-.tree-head b { color: var(--ink); }
-.badge { font-size: .68rem; color: var(--close); border: 1px solid currentColor; border-radius: 3px; padding: 0 4px; white-space: nowrap; }
-.s-owned .badge { color: var(--paper); }
+/* sky: one constellation at a time, read bottom-up (Skyrim's skill menu).
+   The sky is night in both themes on purpose. */
+:root { --sky-bg1: #070b18; --sky-bg2: #18223f; --sky-line: rgba(168, 188, 240, .30); --sky-text: #d3dbf0; --sky-dim: #6a7592;
+  --star-owned: #fff0b3; --star-avail: #a6e0ff; --star-close: #e8c56c; --star-locked: #49536f; --star-plain: #dfe6ff; --sky-hot: #ff9b7a; }
+.sky { position: relative; background: radial-gradient(ellipse at 50% 110%, var(--sky-bg2), var(--sky-bg1) 70%); color: var(--sky-text); min-width: 560px; }
+.sky svg { display: block; width: 100%; height: auto; }
+.sky .bgstar { fill: #fff; }
+.sky .edge { fill: none; stroke: var(--sky-line); stroke-width: 1.3; }
+.sky .edge.root { stroke-dasharray: 2 5; }
+.sky .edge.dash { stroke-dasharray: 6 5; }
+.sky .edge.lit { stroke: var(--star-owned); opacity: .75; }
+.sky .edge.hot { stroke: var(--sky-hot); stroke-width: 2; opacity: 1; }
+.sky .edge.dim { opacity: .12; }
+.star { cursor: pointer; outline: none; }
+.star text { fill: var(--sky-text); font: 500 12px var(--body); text-anchor: middle; paint-order: stroke; stroke: var(--sky-bg1); stroke-width: 3px; }
+.star .core, .star .halo { fill: var(--star-plain); }
+.star .halo { opacity: .22; }
+.star.s-owned .core, .star.s-owned .halo { fill: var(--star-owned); }
+.star.s-owned .halo { opacity: .45; }
+.star.s-owned text { fill: var(--star-owned); font-weight: 700; }
+.star.s-available .core, .star.s-available .halo { fill: var(--star-avail); }
+.star.s-close .core { fill: var(--sky-bg1); stroke: var(--star-close); stroke-width: 1.6; }
+.star.s-close .halo { fill: var(--star-close); opacity: .12; }
+.star.s-locked .core { fill: var(--star-locked); }
+.star.s-locked .halo { opacity: 0; }
+.star.s-locked text { fill: var(--sky-dim); }
+.star.sealed text { font-style: italic; fill: var(--sky-dim); }
+.star .ring { fill: none; stroke: var(--sky-hot); stroke-width: 1.8; opacity: 0; }
+.star.sel .ring, .star:focus-visible .ring { opacity: 1; }
+.star.faded { opacity: .22; }
+.star.dim { opacity: .3; }
+.root text { fill: var(--sky-dim); font: 700 11px var(--body); letter-spacing: .08em; text-transform: uppercase; text-anchor: middle; }
+.root text tspan.v { fill: var(--sky-text); letter-spacing: 0; }
+.root path { fill: none; stroke: var(--sky-dim); stroke-width: 1.4; }
+.sky-cap { position: sticky; bottom: 0; display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 10px; padding: 8px 12px 12px;
+  background: linear-gradient(to top, var(--sky-bg1) 55%, transparent); }
+.sky-cap .nm { text-align: center; }
+.sky-cap h2 { margin: 0; font: 700 1.9rem/1 var(--display); letter-spacing: .06em; color: #f1f3fb; text-wrap: balance; }
+.sky-cap p { margin: 4px 0 0; font-size: .88rem; color: var(--sky-text); font-variant-numeric: tabular-nums; }
+.sky-cap button { background: none; border: 0; color: var(--sky-dim); cursor: pointer; font: 500 .95rem var(--display); padding: 6px 4px; }
+.sky-cap button:hover { color: var(--sky-text); }
+.sky-cap .prev { justify-self: start; } .sky-cap .next { justify-self: end; }
+@media (prefers-reduced-motion: no-preference) {
+  .sky svg.turn-l { animation: turnL .28s ease-out; } .sky svg.turn-r { animation: turnR .28s ease-out; }
+  @keyframes turnL { from { opacity: 0; transform: translateX(-36px); } }
+  @keyframes turnR { from { opacity: 0; transform: translateX(36px); } }
+}
 
 /* cards */
 .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; padding: 12px; }
@@ -158,7 +189,7 @@ aside.detail ul { margin: 0; padding-left: 0; list-style: none; display: grid; g
         <button id="viewer-gm" data-viewer="gm">GM</button><button id="viewer-player" data-viewer="player">Player</button>
       </div>
       <div class="seg" role="group" aria-label="View">
-        <button id="view-map" data-view="map">Map</button><button id="view-cards" data-view="cards">Cards</button>
+        <button id="view-map" data-view="map">Sky</button><button id="view-cards" data-view="cards">Cards</button>
       </div>
     </div>
   </header>
@@ -307,18 +338,50 @@ const cap = s => s.toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
 // ---- state ---------------------------------------------------------------------
 const store = { get(k, d) { try { const v = localStorage.getItem('atlas.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
                 set(k, v) { try { localStorage.setItem('atlas.' + k, JSON.stringify(v)); } catch {} } };
-const S = { tab: store.get('tab', 'abilities'), view: store.get('view', 'map'), char: store.get('char', Object.keys(D.characters || {})[0] || ''),
+const S = { allSchools: false, tab: store.get('tab', 'g-weapons'), view: store.get('view', 'map'), char: store.get('char', Object.keys(D.characters || {})[0] || ''),
   viewer: store.get('viewer', 'gm'), q: '', off: new Set(), sel: null };
-if (location.hash.length > 1) { const h = location.hash.slice(1); if (h === 'abilities' || SCHOOLS.some(s => s.id === h)) S.tab = h; }
+if (location.hash.length > 1) S.tab = location.hash.slice(1);   // render() falls back to the first visible constellation
 const ch = () => CHARS[S.char] || null;
 document.getElementById('char').insertAdjacentHTML('beforeend', Object.entries(CHARS).map(([k, c]) => `<option value="${k}">${esc(c.name)}</option>`).join(''));
 
-// ---- helpers for the current tab ---------------------------------------------
+// ---- constellations ------------------------------------------------------------
+const GROUPS = [['weapons', 'Weapons'], ['strength', 'Strength'], ['agility', 'Agility'], ['intelligence', 'Intelligence'],
+  ['charisma', 'Charisma'], ['open', 'Untrained'], ['magic', 'Magic']];
+function laneOf(a) {
+  let r = a.requirement;
+  if (r.type === 'allOf') r = r.of.find(p => p.skills) || r;
+  if (a.stub) return { key: 'Not printed', group: 'open', level: 0 };
+  if (r.type === 'none') return { key: 'No requirement', group: 'open', level: 0 };
+  const level = r.level ?? 0;
+  if (r.group) return { key: reqLabel({ ...r, level: '' }).trim(), group: r.group === 'magic' ? 'magic' : 'weapons', level, skills: r.skills, any: true };
+  const skills = r.skills.map(x => ALIAS[x] || x);
+  const first = skills[0];
+  const group = WEAPONS.includes(first) ? 'weapons' : MAGIC_SKILLS.includes(first) ? 'magic'
+    : ({ STR: 'strength', AGL: 'agility', INT: 'intelligence', CHA: 'charisma' })[ATTR[first]] || 'open';
+  return { key: skills.join(' / '), group, level, skills };
+}
+// magic by nature, whatever the requirement says: the gateway, the mage pack, the enchanter's stub
+const groupOf = a => (a.id === 'magic-talent' || a.source === 'svendsen' || a.id === 'book-of-magic.demonsmith') ? 'magic' : laneOf(a).group;
+const showAllMagic = () => !ch() || (S.viewer === 'gm' && S.allSchools);
 function tabItems(tab) {
-  if (tab === 'abilities') return D.abilities;
+  if (tab.startsWith('g-')) {
+    const g = tab.slice(2), c = ch();
+    let items = D.abilities.filter(a => groupOf(a) === g && !(a.stub && S.viewer === 'player'));
+    if (g === 'magic' && !showAllMagic()) {
+      if (!anySchool(c)) return items.filter(a => a.id === 'magic-talent');       // the doorway, nothing else
+      items = items.filter(a => { const l = laneOf(a); return !l.skills || l.any || l.skills.some(k => (c.skills[k] || 0) > 0); });
+    }
+    return items;
+  }
   const school = SCHOOLS.find(s => s.id === tab).name.toUpperCase();
   return D.magic.filter(m => m.school === school);
 }
+function constellations() {
+  const all = [...GROUPS.map(([g, n]) => ({ id: 'g-' + g, name: n, kind: 'abilities' })),
+               ...SCHOOLS.map(s => ({ id: s.id, name: s.name, kind: 'school' }))];
+  return all.filter(k => k.kind === 'abilities' ? tabItems(k.id).length > 0 : (showAllMagic() || hasSchool(ch(), k.id)));
+}
+const tabOf = id => ABIL[id] ? 'g-' + groupOf(ABIL[id]) : SCHOOLS.find(s => s.name.toUpperCase() === MAGIC[id].school).id;
 const sealed = a => S.viewer === 'player' && a.status === 'earned' && !(ch() && ch().abilities.includes(a.id));
 function passes(item) {
   if (S.q && !(sealed(item) ? false : item.name.toLowerCase().includes(S.q.toLowerCase()))) return false;
@@ -328,116 +391,149 @@ function passes(item) {
   if (st && S.off.has('st:' + st)) return false;
   return true;
 }
-function nodeHTML(item, extra = '') {
-  const st = statusOf(item.id, ch());
-  const cls = ['node', st ? 's-' + st : '', sealed(item) ? 'sealed' : '', item.stub ? 'stub' : '', S.sel === item.id ? 'sel' : '', passes(item) ? '' : 'faded'].join(' ');
-  if (sealed(item)) return `<button class="${cls}" data-id="${item.id}" title="Earned in play">Sealed · earned in play</button>`;
-  const src = item.source === 'homebrew' ? '<span class="src">VP</span>' : item.source === 'svendsen' ? '<span class="src">SV</span>' : '';
-  const meta = ABIL[item.id] ? (item.wp && item.wp !== '—' && item.wp !== '–' ? `${esc(item.wp)} WP` : '') : '';
-  return `<button class="${cls}" data-id="${item.id}"><span>${esc(item.name)}</span>${src}${meta ? `<span class="meta">${meta}</span>` : ''}${extra}</button>`;
-}
-
-// ---- ladder (heroic abilities) ---------------------------------------------
-function laneOf(a) {
-  let r = a.requirement;
-  if (r.type === 'allOf') r = r.of.find(p => p.skills) || r;
-  if (a.stub) return { key: 'Not printed', group: 'Open', level: null };
-  if (r.type === 'none') return { key: 'No requirement', group: 'Open', level: null };
-  const level = r.level ?? null;
-  if (r.group) return { key: reqLabel({ ...r, level: '' }).trim(), group: r.group === 'magic' ? 'Magic' : 'Weapons', level, skills: r.skills };
-  const key = r.skills.map(s => ALIAS[s] || s).join(' / ');
-  const first = ALIAS[r.skills[0]] || r.skills[0];
-  const group = WEAPONS.includes(first) ? 'Weapons' : MAGIC_SKILLS.includes(first) ? 'Magic' : ({ STR:'Strength', AGL:'Agility', INT:'Intelligence', CHA:'Charisma' })[ATTR[first]] || 'Other';
-  return { key, group, level, skills: r.skills.map(s => ALIAS[s] || s) };
-}
-function renderLadder() {
-  const items = D.abilities.filter(a => !(a.stub && S.viewer === 'player'));
-  const GROUPS = ['Open', 'Weapons', 'Strength', 'Agility', 'Intelligence', 'Charisma', 'Magic', 'Other'];
-  const levels = [...new Set(items.map(a => laneOf(a).level ?? 0))].sort((x, y) => y - x);   // top = highest
-  const c = ch();
-  let html = `<div class="tree-head"><span><b>Heroic abilities</b> · ${items.length}, by the skill level they need</span>
-    <span class="legend">Read from the bottom up. Arrows: an upgrade opens once the ability below is mastered.</span></div><div class="climb">`;
-  for (const lv of levels) {
-    const here = items.filter(a => (laneOf(a).level ?? 0) === lv);
-    const lanes = new Map();
-    for (const a of here) { const l = laneOf(a); if (!lanes.has(l.key)) lanes.set(l.key, { ...l, items: [] }); lanes.get(l.key).items.push(a); }
-    const ordered = [...lanes.values()].sort((x, y) => GROUPS.indexOf(x.group) - GROUPS.indexOf(y.group) || x.key.localeCompare(y.key));
-    html += `<section class="tier"><h3>${lv ? 'Skill ' + lv : 'No requirement'}<small>${here.length}</small></h3><div class="tier-row">`;
-    for (const l of ordered) {
-      const have = c && l.skills ? Math.max(...l.skills.map(s => sv(c, s))) : null;
-      const reached = have != null && lv && have >= lv;
-      html += `<div class="cluster${reached ? ' reached' : ''}"><div class="cl"><span>${esc(l.key)}</span>${have != null ? `<b title="${esc(c.name)}">${have}</b>` : ''}</div>
-        <div class="in">${l.items.sort((p, q) => p.name.localeCompare(q.name)).map(a => nodeHTML(a)).join('')}</div></div>`;
-    }
-    html += '</div></section>';
-  }
-  return html + '</div>';
-}
-function ladderEdges() {
-  const e = [];
-  for (const a of D.abilities) {
-    if (a.upgradeOf) e.push({ from: a.upgradeOf, to: a.id });
-    for (const ref of reqRefs(a.requirement)) if (ref !== a.upgradeOf && ABIL[ref]) e.push({ from: ref, to: a.id, dash: a.requirement.type === 'has' || a.requirement.of?.some(p => p.type === 'has') });
-  }
-  return e;
-}
-
-// ---- tree (a school) -----------------------------------------------------------
-function renderTree(tab) {
-  const school = SCHOOLS.find(s => s.id === tab);
-  const items = tabItems(tab);
-  const ranks = [...new Set(items.map(m => m.rank))].sort((a, b) => a - b);
-  const byRank = Object.fromEntries(ranks.map(r => [r, items.filter(m => m.rank === r).sort((a, b) => a.name.localeCompare(b.name))]));
-  // order each column by the average position of its prerequisites (fewer crossings)
-  const pos = {};
-  for (const r of ranks) {
-    const col = byRank[r];
-    col.forEach((m, i) => { m._bary = i; });
-    for (const m of col) {
-      const ps = prereqSpells(m).filter(p => pos[p] != null);
-      if (ps.length) m._bary = ps.reduce((s, p) => s + pos[p], 0) / ps.length;
-      else m._bary = 1000 + col.indexOf(m);
-    }
-    col.sort((a, b) => a._bary - b._bary || a.name.localeCompare(b.name));
-    col.forEach((m, i) => { pos[m.id] = i; });
-  }
-  const c = ch();
-  const kind = items.some(m => m.kind === 'recipe') ? 'Recipes' : items.some(m => m.kind === 'enchantment') ? 'Enchantments' : 'Spells';
-  let head = `<div class="tree-head"><span><b>${esc(school.name)}</b> · ${items.filter(m => m.kind !== 'trick').length} ${kind.toLowerCase()}, ${items.filter(m => m.kind === 'trick').length} tricks</span>`;
-  if (school.study && school.study.skills) head += `<span>To study: <b>${esc(school.study.skills[0])} ${school.study.level}</b></span>`;
-  if (c) {
-    const skill = tab === 'harmonism' ? 'Performance' : MAGIC_SKILLS.find(s => slug(s) === tab);
-    if (tab === 'general-magic') head += `<span>${esc(c.name)}: ${anySchool(c) ? '<span class="ok">knows a school</span>' : '<span class="no">no school</span>'}</span>`;
-    else if (skill) head += `<span>${esc(c.name)}: <b>${esc(skill)} ${sv(c, skill) || '—'}</b></span>`;
-  }
-  head += `<span class="legend">Read from the bottom up. Solid line: needs it · dashed: one of several</span></div>`;
-  const tiers = [...ranks].reverse().map(r => `<section class="tier"><h3>${r === 0 ? 'Magic tricks' : 'Rank ' + r}<small>${byRank[r].length}</small></h3>
-    <div class="tier-row">${byRank[r].map(m => nodeHTML(m, badges(m))).join('')}</div></section>`).join('');
-  return head + `<div class="climb">${tiers}</div>`;
-}
 function prereqSpells(m) {
   const p = m.prerequisite || {};
   return (p.anyOf || p.allOf || []).filter(o => o.spell).map(o => o.spell);
 }
-function badges(m) {
-  const p = m.prerequisite || {};
-  const opts = p.anyOf || p.allOf || [];
-  const out = [];
-  for (const o of opts) {
-    if (o.anyRank) out.push(`any R${o.anyRank}${o.school ? ' ' + cap(o.school).slice(0, 5) + '.' : ''}`);
-    if (o.skill) out.push(`${o.skill} ${o.level}`);
-    if (o.spell && MAGIC[o.spell] && MAGIC[o.spell].school !== m.school) out.push(`via ${MAGIC[o.spell].name}`);
+
+// ---- sky layout ------------------------------------------------------------------
+const TIER = 100, BASE = 92, TOP = 56, GAP = 108;
+function spread(list, W) {
+  // list of {want} → sets x, plus a small vertical stagger (dy) when a tier is crowded
+  list.sort((a, b) => a.want - b.want);
+  const n = list.length, left = 60, right = W - 60;
+  if (n === 1) { list[0].x = Math.min(right, Math.max(left, list[0].want)); list[0].dy = 0; return; }
+  if ((n - 1) * GAP <= right - left) {
+    list.forEach((o, i) => { o.x = Math.max(o.want, i ? list[i - 1].x + GAP : left); o.dy = 0; });
+    for (let i = n - 1; i >= 0; i--) list[i].x = Math.min(list[i].x, i < n - 1 ? list[i + 1].x - GAP : right);
+    return;
   }
-  return out.map(b => `<span class="badge">${esc(b)}</span>`).join('');
+  const step = (right - left) / (n - 1);
+  list.forEach((o, i) => { o.x = left + i * step; o.dy = i % 2 ? -38 : 0; });
 }
-function treeEdges(tab) {
-  const e = [];
-  for (const m of tabItems(tab)) {
-    const p = m.prerequisite || {};
-    const ps = prereqSpells(m);
-    for (const s of ps) e.push({ from: s, to: m.id, dash: !!p.anyOf && (p.anyOf.length > 1) });
+function layoutSky(tab, W) {
+  const c = ch(), items = tabItems(tab);
+  const stars = [], edges = [], roots = [];
+  const byId = {};
+  if (tab.startsWith('g-')) {
+    const lanes = new Map();
+    for (const a of items) {
+      const l = a.id === 'magic-talent' ? { key: 'Magic Talent', skills: null } : laneOf(a);
+      if (!lanes.has(l.key)) lanes.set(l.key, { key: l.key, skills: l.skills, items: [] });
+      lanes.get(l.key).items.push(a);
+    }
+    const ls = [...lanes.values()].sort((x, y) => x.key.localeCompare(y.key));
+    const laneFor = a => ls.find(l => l.items.includes(a));
+    const levels = [...new Set(items.map(a => laneOf(a).level))].sort((x, y) => x - y);
+    const H = TOP + BASE + levels.length * TIER + 40;
+    const rootY = H - BASE;
+    const spots = ls.map((l, i) => ({ l, want: W * (i + 1) / (ls.length + 1) }));
+    spread(spots, W);
+    for (const r of spots) {
+      const have = c && r.l.skills ? Math.max(...r.l.skills.map(k => sv(c, k))) : null;
+      r.l.x = r.x; r.l.y = rootY + r.dy;
+      roots.push({ x: r.x, y: r.l.y, label: r.l.key === 'Magic Talent' ? 'The gift' : r.l.key, value: have });
+    }
+    levels.forEach((lv, t) => {
+      const tier = items.filter(a => laneOf(a).level === lv).map(a => ({ a, want: laneFor(a).x }));
+      spread(tier, W);
+      for (const s of tier) {
+        const star = { id: s.a.id, item: s.a, x: s.x, y: rootY - (t + 1) * TIER + s.dy };
+        stars.push(star); byId[star.id] = star;
+        const lane = laneFor(s.a);
+        edges.push({ fx: lane.x, fy: lane.y, to: s.a.id, root: true });
+      }
+    });
+    for (const a of items) for (const ref of new Set([a.upgradeOf, ...reqRefs(a.requirement)].filter(Boolean)))
+      if (byId[ref]) edges.push({ from: ref, to: a.id, dash: ref !== a.upgradeOf });
+    return { H, stars, edges, roots, byId, levels: levels.map((lv, t) => ({ y: rootY - (t + 1) * TIER, label: lv ? 'Skill ' + lv : 'No requirement' })) };
   }
-  return e;
+  // a school: the school is the root, tricks flank it, ranks climb
+  const school = SCHOOLS.find(s => s.id === tab);
+  const tricks = items.filter(m => m.kind === 'trick');
+  const ranked = items.filter(m => m.kind !== 'trick');
+  const ranks = [...new Set(ranked.map(m => m.rank))].sort((x, y) => x - y);
+  const H = TOP + BASE + ranks.length * TIER + 70;
+  const rootY = H - BASE - 30, cx = W / 2;
+  const skill = tab === 'harmonism' ? 'Performance' : MAGIC_SKILLS.find(k => slug(k) === tab);
+  roots.push({ x: cx, y: rootY, label: school.name, value: c && skill ? sv(c, skill) : null, big: true });
+  tricks.forEach((m, i) => {
+    const side = i % 2 ? 1 : -1, k = Math.floor(i / 2) + 1;
+    const st = { id: m.id, item: m, x: cx + side * (40 + k * 92), y: rootY + 30, small: true };
+    stars.push(st); byId[m.id] = st;
+    edges.push({ fx: cx, fy: rootY, to: m.id, root: true });
+  });
+  ranks.forEach((r, t) => {
+    const tier = ranked.filter(m => m.rank === r).map(m => {
+      const ps = prereqSpells(m).filter(p => byId[p]);
+      return { m, want: ps.length ? ps.reduce((sum, p) => sum + byId[p].x, 0) / ps.length : cx };
+    });
+    spread(tier, W);
+    for (const s of tier) {
+      const st = { id: s.m.id, item: s.m, x: s.x, y: rootY - (t + 1) * TIER + s.dy };
+      stars.push(st); byId[st.id] = st;
+    }
+  });
+  for (const m of ranked) {
+    const p = m.prerequisite || {}; const opts = p.anyOf || p.allOf || [];
+    for (const sp of prereqSpells(m)) if (byId[sp]) edges.push({ from: sp, to: m.id, dash: !!p.anyOf && p.anyOf.length > 1 });
+    if (opts.some(o => o.school || o.anySchool || o.skill)) edges.push({ fx: cx, fy: rootY, to: m.id, root: true });
+  }
+  return { H, stars, edges, roots, byId, levels: ranks.map((r, t) => ({ y: rootY - (t + 1) * TIER, label: 'Rank ' + r })) };
+}
+function rng(seed) { let x = seed || 1; return () => (x = (x * 16807) % 2147483647) / 2147483647; }
+function hash(str) { let h = 7; for (const k of str) h = (h * 31 + k.charCodeAt(0)) % 2147483647; return h; }
+function renderSky(tab, W, dir) {
+  const L = layoutSky(tab, W), c = ch();
+  const links = L.edges.filter(e => e.from);
+  const rel = S.sel && L.byId[S.sel] ? lineage(S.sel, links) : null;
+  const R = rng(hash(tab));
+  let bg = '';
+  for (let i = 0; i < 130; i++) bg += `<circle class="bgstar" cx="${(R() * W).toFixed(1)}" cy="${(R() * L.H).toFixed(1)}" r="${(0.3 + R() * 1.1).toFixed(2)}" opacity="${(0.15 + R() * 0.6).toFixed(2)}"/>`;
+  const lv = L.levels.map(l => `<text x="14" y="${l.y + 4}" fill="var(--sky-dim)" font-size="11">${esc(l.label)}</text>`).join('');
+  let ed = '';
+  for (const e of L.edges) {
+    const b = L.byId[e.to]; if (!b) continue;
+    const a = e.from ? L.byId[e.from] : { x: e.fx, y: e.fy };
+    const lit = e.from && statusOf(e.from, c) === 'owned' && statusOf(e.to, c) === 'owned';
+    const cls = ['edge', e.root ? 'root' : '', e.dash ? 'dash' : '', lit ? 'lit' : '',
+      rel ? (e.from && rel.has(e.from) && rel.has(e.to) ? 'hot' : 'dim') : ''].join(' ');
+    const my = (a.y + b.y) / 2;
+    ed += `<path class="${cls}" d="M${a.x},${a.y} C${a.x},${my} ${b.x},${my} ${b.x},${b.y}"/>`;
+  }
+  let rt = '';
+  for (const r of L.roots) {
+    const k = r.big ? 11 : 7;
+    rt += `<g class="root" transform="translate(${r.x},${r.y})"><path d="M0,${-k} L${k},0 L0,${k} L${-k},0 Z"/>
+      <text y="${k + 16}">${esc(r.label)}${r.value != null ? ` <tspan class="v">${r.value}</tspan>` : ''}</text></g>`;
+  }
+  let st = '';
+  for (const s of L.stars) {
+    const it = s.item, status = statusOf(it.id, c), seal = sealed(it);
+    const cls = ['star', status ? 's-' + status : '', seal ? 'sealed' : '', S.sel === it.id ? 'sel' : '', passes(it) ? '' : 'faded',
+      rel && !rel.has(it.id) ? 'dim' : ''].join(' ');
+    const r = s.small ? 3 : status === 'owned' ? 6 : status === 'locked' ? 3.6 : 4.8;
+    const name = seal ? 'Sealed' : it.name;
+    st += `<g class="${cls}" data-id="${it.id}" tabindex="0" role="button" aria-label="${esc(name)}${status ? ', ' + STATUS_LABEL[status] : ''}" transform="translate(${s.x},${s.y})">
+      <circle class="halo" r="${r * 3}" filter="url(#glow)"/><circle class="core" r="${r}"/><circle class="ring" r="${r + 6}"/>
+      <text y="${r + 15}"${s.small ? ' font-size="10.5"' : ''}>${esc(name)}</text></g>`;
+  }
+  const list = constellations(), i = list.findIndex(k => k.id === tab);
+  const prev = list[(i - 1 + list.length) % list.length], next = list[(i + 1) % list.length];
+  const here = list[i] || { name: tab };
+  let sub;
+  if (c) {
+    const cnt = { owned: 0, available: 0, close: 0 };
+    for (const s of L.stars) { const k = statusOf(s.id, c); if (k in cnt) cnt[k]++; }
+    const main = L.roots.length === 1 && L.roots[0].value != null ? `${esc(L.roots[0].label)} ${L.roots[0].value} · ` : '';
+    sub = `${esc(c.name.split(' ')[0])}: ${main}${cnt.owned} lit · ${cnt.available} open · ${cnt.close} in reach`;
+  } else sub = `${L.stars.length} stars`;
+  return `<div class="sky"><svg class="${dir ? 'turn-' + dir : ''}" viewBox="0 0 ${W} ${L.H}" width="${W}" height="${L.H}" role="img" aria-label="${esc(here.name)} constellation">
+      <defs><filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3"/></filter></defs>
+      ${bg}${lv}${ed}${rt}${st}</svg>
+    <div class="sky-cap"><button class="prev" data-tab="${prev.id}" data-dir="l" aria-label="Previous constellation">‹ ${esc(prev.name)}</button>
+      <div class="nm"><h2>${esc(here.name)}</h2><p>${sub}</p></div>
+      <button class="next" data-tab="${next.id}" data-dir="r" aria-label="Next constellation">${esc(next.name)} ›</button></div></div>`;
 }
 
 // ---- cards ---------------------------------------------------------------------
@@ -486,7 +582,7 @@ function renderDetail() {
     el.innerHTML = `<div class="kicker">How to read this</div>
       <p class="prose">Pick an ability or spell to see what it needs and what it opens. Choose a character to colour the map by what they can reach.</p>
       <div class="legend"><span class="node s-owned">Has it</span><span class="node s-available">Can take now</span><span class="node s-close">Within reach</span><span class="node s-locked">Locked</span></div>
-      <p class="empty">Both maps read from the bottom up. Heroic abilities climb by the skill level they need; a shaded skill box means the character already has that level. Schools climb from magic tricks through the ranks, with lines up to the spells each one opens.</p>`;
+      <p class="empty">One constellation at a time, like Skyrim. Turn the sky with the arrows or the arrow keys. Each skill or school is a root at the bottom; stars climb by the skill level or rank they need, and lines run up to what each one opens. Lit stars are held; bright ones can be taken now.</p>`;
     el.hidden = window.matchMedia('(max-width: 900px)').matches;
     return;
   }
@@ -541,120 +637,75 @@ function renderDetail() {
   el.innerHTML = h;
 }
 
-// ---- edges ---------------------------------------------------------------------
-function drawEdges(edges) {
-  const inner = document.getElementById('inner');
-  inner.querySelector('svg.edges')?.remove();
-  if (!edges.length) return;
-  const box = inner.getBoundingClientRect();
-  const at = id => inner.querySelector(`.node[data-id="${CSS.escape(id)}"]`);
-  const related = S.sel ? lineage(S.sel, edges) : null;
-  const cls = e => !related ? '' : related.has(e.from) && related.has(e.to) ? 'hot' : 'dim';
-  let paths = '';
-  for (const e of edges) {
-    const a = at(e.from), b = at(e.to);
-    if (!a || !b) continue;
-    const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect();
-    const ax = ra.left + ra.width / 2 - box.left, bx = rb.left + rb.width / 2 - box.left;
-    let d;
-    if (Math.abs(ra.top - rb.top) < 12) {            // same row: arc over the top
-      const y = Math.min(ra.top, rb.top) - box.top, lift = 26;
-      d = `M${ax},${y} C${ax},${y - lift} ${bx},${y - lift} ${bx},${y}`;
-    } else if (rb.top < ra.top) {                     // the usual case: what it opens sits above
-      const y1 = ra.top - box.top, y2 = rb.bottom - box.top, my = (y1 + y2) / 2;
-      d = `M${ax},${y1} C${ax},${my} ${bx},${my} ${bx},${y2}`;
-    } else {
-      const y1 = ra.bottom - box.top, y2 = rb.top - box.top, my = (y1 + y2) / 2;
-      d = `M${ax},${y1} C${ax},${my} ${bx},${my} ${bx},${y2}`;
-    }
-    paths += `<path class="${e.dash ? 'dash' : ''} ${cls(e)}" d="${d}"/>`;
-  }
-  inner.insertAdjacentHTML('afterbegin', `<svg class="edges" width="${inner.scrollWidth}" height="${inner.scrollHeight}" aria-hidden="true">${paths}</svg>`);
-}
+// ---- lineage -------------------------------------------------------------------
 function lineage(id, edges) {
   const set = new Set([id]);
-  let grew = true;
-  while (grew) {
-    grew = false;
-    for (const e of edges) {
-      if (set.has(e.to) && !set.has(e.from) && ancestorsOnly(e.to)) { set.add(e.from); grew = true; }
-    }
-  }
-  // descendants
+  const up = [id];
+  while (up.length) { const x = up.pop(); for (const e of edges) if (e.to === x && !set.has(e.from)) { set.add(e.from); up.push(e.from); } }
   const down = [id];
   while (down.length) { const x = down.pop(); for (const e of edges) if (e.from === x && !set.has(e.to)) { set.add(e.to); down.push(e.to); } }
   return set;
-  function ancestorsOnly() { return true; }
 }
 
 // ---- render --------------------------------------------------------------------
-let lastPlace = null;
+let lastPlace = null, turnDir = null;
 function render() {
   memo.clear();
   const c = ch();
-  // tabs
-  const tabs = [['abilities', 'Heroic Abilities'], ...SCHOOLS.map(s => [s.id, s.name])];
-  document.getElementById('tabs').innerHTML = tabs.map(([id, name], i) => {
-    const n = c ? tabItems(id).filter(x => statusOf(x.id, c) === 'available').length : 0;
-    return (i === 1 ? '<span class="sep"></span>' : '') + `<button role="tab" id="tab-${id}" aria-selected="${S.tab === id}" data-tab="${id}">${esc(name)}${n ? `<span class="n" title="Can take now">${n}</span>` : ''}</button>`;
+  const list = constellations();
+  if (!list.some(k => k.id === S.tab)) S.tab = list[0].id;
+  document.getElementById('tabs').innerHTML = list.map((k, i) => {
+    const n = c ? tabItems(k.id).filter(x => statusOf(x.id, c) === 'available').length : 0;
+    const sep = i && k.kind !== list[i - 1].kind ? '<span class="sep"></span>' : '';
+    return sep + `<button role="tab" id="tab-${k.id}" aria-selected="${S.tab === k.id}" data-tab="${k.id}">${esc(k.name)}${n ? `<span class="n" title="Can take now">${n}</span>` : ''}</button>`;
   }).join('');
-  // toggles
   document.querySelectorAll('[data-viewer]').forEach(b => b.setAttribute('aria-pressed', b.dataset.viewer === S.viewer));
   document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === S.view));
   document.getElementById('char').value = S.char;
-  // chips
   const items = tabItems(S.tab);
   const sources = [...new Set(items.map(i => i.source))];
-  document.getElementById('src-chips').innerHTML = sources.length > 1 ? `<span class="lbl">Source</span>` + sources.map(s => `<button class="chip" data-chip="src:${s}" aria-pressed="${!S.off.has('src:' + s)}">${esc(SOURCE_LABEL[s] || s)}</button>`).join('') : '';
+  document.getElementById('src-chips').innerHTML = (sources.length > 1 ? `<span class="lbl">Source</span>` + sources.map(s => `<button class="chip" data-chip="src:${s}" aria-pressed="${!S.off.has('src:' + s)}">${esc(SOURCE_LABEL[s] || s)}</button>`).join('') : '')
+    + (c && S.viewer === 'gm' ? ` <button class="chip" data-allschools="1" aria-pressed="${!!S.allSchools}" title="GM only: show magic this character cannot use">All magic</button>` : '');
   const slotsHere = ['combat', 'non-combat', 'either', 'undecided'].filter(k => items.some(i => i.slot === k));
   document.getElementById('slot-chips').innerHTML = slotsHere.length ? `<span class="lbl">Slot</span>` + slotsHere.map(k => `<button class="chip" data-chip="slot:${k}" aria-pressed="${!S.off.has('slot:' + k)}">${SLOT_LABEL[k]}</button>`).join('') : '';
   document.getElementById('st-chips').innerHTML = c ? `<span class="lbl">Show</span>` + Object.entries(STATUS_LABEL).map(([k, v]) => `<button class="chip" data-chip="st:${k}" aria-pressed="${!S.off.has('st:' + k)}">${v}</button>`).join('') : '';
-  // summary
-  const sum = document.getElementById('summary');
-  if (c) {
-    const cnt = { owned: 0, available: 0, close: 0 };
-    for (const it of items) { const st = statusOf(it.id, c); if (st in cnt) cnt[st]++; }
-    sum.innerHTML = `${esc(c.name.split(' ')[0])}: <b>${cnt.owned}</b> held · <b>${cnt.available}</b> open now · <b>${cnt.close}</b> within reach · of ${items.length}`;
-  } else sum.textContent = `${items.length} entries`;
-  // stage
-  const inner = document.getElementById('inner');
+  document.getElementById('summary').textContent = '';
+  const inner = document.getElementById('inner'), plate = document.getElementById('plate');
   if (S.view === 'cards') inner.innerHTML = renderCards(S.tab);
-  else inner.innerHTML = S.tab === 'abilities' ? renderLadder() : renderTree(S.tab);
+  else inner.innerHTML = renderSky(S.tab, Math.max(560, plate.clientWidth - 2), turnDir);
+  turnDir = null;
   renderDetail();
   const place = S.tab + '/' + S.view;
-  requestAnimationFrame(() => {
-    if (S.view === 'map' && place !== lastPlace) { const pl = document.getElementById('plate'); pl.scrollTop = pl.scrollHeight; }
-    lastPlace = place;
-    if (S.view === 'map') {
-      const edges = S.tab === 'abilities' ? ladderEdges() : treeEdges(S.tab);
-      drawEdges(edges);
-      if (S.sel) {
-        const rel = lineage(S.sel, edges);
-        inner.querySelectorAll('.node').forEach(n => { if (!rel.has(n.dataset.id) && edges.some(e => e.from === S.sel || e.to === S.sel)) n.classList.add('dim'); });
-      }
-    }
-  });
+  if (S.view === 'map' && place !== lastPlace) requestAnimationFrame(() => { plate.scrollTop = plate.scrollHeight; });
+  lastPlace = place;
   store.set('tab', S.tab); store.set('view', S.view); store.set('char', S.char); store.set('viewer', S.viewer);
+}
+function turn(step) {
+  const list = constellations(), i = list.findIndex(k => k.id === S.tab);
+  S.tab = list[(i + step + list.length) % list.length].id; S.sel = null; turnDir = step < 0 ? 'l' : 'r'; render();
 }
 
 document.addEventListener('click', e => {
-  const t = e.target.closest('button');
+  const t = e.target.closest('button, .star');
   if (!t) return;
-  if (t.dataset.tab) { S.tab = t.dataset.tab; S.sel = null; S.off = new Set([...S.off].filter(k => !k.startsWith('src:'))); render(); return; }
+  if (t.dataset.tab) { turnDir = t.dataset.dir || null; S.tab = t.dataset.tab; S.sel = null; S.off = new Set([...S.off].filter(k => !k.startsWith('src:'))); render(); return; }
   if (t.dataset.viewer) { S.viewer = t.dataset.viewer; render(); return; }
   if (t.dataset.view) { S.view = t.dataset.view; render(); return; }
+  if (t.dataset.allschools) { S.allSchools = !S.allSchools; render(); return; }
   if (t.dataset.chip) { const k = t.dataset.chip; S.off.has(k) ? S.off.delete(k) : S.off.add(k); render(); return; }
   if (t.dataset.close) { S.sel = null; render(); return; }
   if (t.dataset.id) {
     const id = t.dataset.id;
-    if (t.dataset.jump) {
-      const target = MAGIC[id] ? SCHOOLS.find(s => s.name.toUpperCase() === MAGIC[id].school).id : 'abilities';
-      S.tab = target;
-    }
+    if (t.dataset.jump && constellations().some(k => k.id === tabOf(id))) S.tab = tabOf(id);
     S.sel = S.sel === id && !t.dataset.jump ? null : id;
     render();
-    if (t.dataset.jump) requestAnimationFrame(() => document.querySelector(`#inner .node[data-id="${CSS.escape(id)}"]`)?.scrollIntoView({ block: 'center', inline: 'center' }));
   }
+});
+document.addEventListener('keydown', e => {
+  if (e.target.matches?.('input, select, textarea')) return;
+  if (e.key === 'ArrowLeft' && S.view === 'map') { e.preventDefault(); turn(-1); }
+  if (e.key === 'ArrowRight' && S.view === 'map') { e.preventDefault(); turn(1); }
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.classList?.contains('star')) { e.preventDefault(); e.target.dispatchEvent(new MouseEvent('click', { bubbles: true })); }
 });
 document.getElementById('char').addEventListener('change', e => { S.char = e.target.value; render(); });
 document.getElementById('q').addEventListener('input', e => { S.q = e.target.value.trim(); render(); });

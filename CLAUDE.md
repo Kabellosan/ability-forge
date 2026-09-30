@@ -4,7 +4,8 @@ Foundry VTT module for Captain's Dragonbane campaign: a map of heroic abilities 
 
 ## Design decisions (and why)
 
-- **Map is the default view, read bottom-up like a skill tree** (Captain, 2026-09-30: no sideways scroll). Heroic abilities: tiers by required skill level (no requirement at the bottom), abilities grouped in skill boxes that wrap; a box is shaded when the character has that level. Schools: magic tricks at the bottom, ranks stacked upward, prerequisite lines run up. Cards view is secondary.
+- **The map is a Skyrim-style sky** (Captain, 2026-09-30). One constellation at a time; turn with arrows/arrow keys. Heroic abilities are split by attribute group (Weapons, Strength, Agility, Intelligence, Charisma, Untrained, Magic); each school is its own constellation. Roots (the skill or school) sit at the bottom, stars climb by level or rank, lines run up to what they open. Lit = held, bright = open now, ring = within reach, dark = locked. The sky is night in both themes on purpose.
+- **Characters see only the magic they can use.** A school's constellation shows only if the character knows it (General Magic once they know any school; Harmonism at Performance 12). A non-mage's Magic constellation holds one star, Magic Talent: the doorway. The GM has an "All magic" toggle. Svendsen pack and Demonsmith always count as Magic.
 - **Tabs:** Heroic Abilities, then General Magic and one per school.
 - **Everything filterable** (source, status, training slot, search). 50–300 entries at once must not overwhelm.
 - **Rules text always visible on the cards in Foundry** (Captain, 2026-09-30). Full text on the card face, for players too. GM notes (the bullets under a homebrew ability) stay GM-only. Sealed earned-in-play cards stay sealed in player view.
