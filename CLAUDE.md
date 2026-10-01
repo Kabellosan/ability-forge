@@ -47,5 +47,5 @@ Same as Terrain Forge and Face Forge: run the tests, bump `version` in module.js
 
 - Training slots fully classified (2026-09-30): nothing undecided.
 - Player visibility beyond the sealed cards still being workshopped on the prototype (https://claude.ai/artifact/UvV2pUYQshFGYFyDgp9Q2W).
-- v0.1.0 is only mock-tested; first live test on Sqyre pending. Needs the catalogue gist (Captain creates it on github.com; no gh CLI here).
+- v0.1.0 is only mock-tested; first live test on Sqyre pending. Catalogue gist: secret, link in the module setting and in Claude's private memory, never in this repo; clone ~/ability-forge-catalogue, pushes over SSH with ~/.ssh/github.
 - Next: training rings (where to store a training value in Foundry: actor flags vs item flags), then polish from the live test.
