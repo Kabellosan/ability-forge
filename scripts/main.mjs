@@ -23,7 +23,7 @@ Hooks.once("init", () => {
 });
 
 Hooks.once("ready", () => {
-  game.modules.get(MOD).api = { open: (actor) => AbilityForgeApp.open(actor), reload: () => { catalogue = null; } };
+  game.modules.get(MOD).api = { open: (actor) => AbilityForgeApp.open(actor), reload: () => { catalogue = null; }, addBookOfMagic };
   log("ready — open with game.modules.get('ability-forge').api.open(actor)");
 });
 
@@ -32,9 +32,10 @@ Hooks.once("ready", () => {
 /* ------------------------------------------------------------------ */
 
 let catalogue = null;   // Promise<atlas>
+let rawCatalogue = null;
 
 function loadAtlas() {
-  catalogue ??= fetchCatalogue().then((data) => L.createAtlas(data)).catch((err) => { catalogue = null; throw err; });
+  catalogue ??= fetchCatalogue().then((data) => { rawCatalogue = data; return L.createAtlas(data); }).catch((err) => { catalogue = null; throw err; });
   return catalogue;
 }
 
@@ -117,6 +118,60 @@ Hooks.on("updateActor", (actor) => refresh(actor));
 for (const h of ["createItem", "updateItem", "deleteItem"]) Hooks.on(h, (item) => refresh(item.parent));
 
 /* ------------------------------------------------------------------ */
+/*  Book of Magic → world items                                        */
+/* ------------------------------------------------------------------ */
+// Character creation tools and the sheet only know a school once its skill, professions and spells
+// exist as world items. This makes them from the private catalogue, in a "Book of Magic" folder.
+// Re-running updates what it made before (flagged) and never touches items it didn't make.
+
+const BOM_FOLDER = "Book of Magic";
+const ours = (i) => i.flags?.[MOD]?.source === "book-of-magic";
+
+async function itemFolder(name, parent = null) {
+  const found = game.folders.find((f) => f.type === "Item" && f.name === name && (f.folder?.id ?? null) === (parent?.id ?? null));
+  return found ?? Folder.create({ name, type: "Item", folder: parent?.id ?? null, sorting: "a" });
+}
+
+async function addBookOfMagic({ confirm = true } = {}) {
+  if (!game.user.isGM) return ui.notifications.warn("Ability Forge: only the GM can add the Book of Magic to the world.");
+  await loadAtlas();
+  const generalName = game.i18n.localize("DoD.spell.general");      // what the core set's general spells carry
+  const key = (type, name) => `${type}/${String(name).toLowerCase()}`;
+  const theirs = new Set(game.items.filter((i) => !ours(i)).map((i) => key(i.type, i.name)));
+  const mine = new Map(game.items.filter(ours).map((i) => [i.flags[MOD].id, i]));
+  const { groups, skipped } = L.bookOfMagicItems(rawCatalogue, { generalName, has: (t, n) => theirs.has(key(t, n)) });
+  const all = Object.values(groups).flat();
+  const fresh = all.filter((d) => !mine.has(d.flags[MOD].id));
+  if (confirm) {
+    const ok = await foundry.applications.api.DialogV2.confirm({
+      window: { title: "Add the Book of Magic to this world" },
+      content: `<p>${fresh.length} new items (${all.length - fresh.length} already added will be refreshed): the new schools as skills,
+        a profession for each (so character creation offers them), and every Book of Magic spell, trick and recipe,
+        in the Items folder <b>${BOM_FOLDER}</b>.</p>
+        <p>${skipped.length} spells or items already in your world under the same name are left as they are.</p>`
+    });
+    if (!ok) return null;
+  }
+  const img = game.modules.get("dragonbane-coreset")?.active ? "modules/dragonbane-coreset/assets/icons/gear/grimoire.webp" : "icons/svg/book.svg";
+  const root = await itemFolder(BOM_FOLDER);
+  let created = 0, updated = 0;
+  for (const [name, list] of Object.entries(groups)) {
+    const folder = await itemFolder(name, root);
+    const toCreate = [], toUpdate = [];
+    for (const d of list) {
+      const old = mine.get(d.flags[MOD].id);
+      if (old) toUpdate.push({ _id: old.id, name: d.name, system: d.system });
+      else toCreate.push({ ...d, img: d.type === "spell" ? img : "icons/svg/book.svg", folder: folder.id });
+    }
+    if (toCreate.length) created += (await Item.createDocuments(toCreate)).length;
+    if (toUpdate.length) updated += (await Item.updateDocuments(toUpdate)).length;
+  }
+  ui.notifications.info(`Ability Forge: Book of Magic added (${created} new, ${updated} refreshed, ${skipped.length} left as they were).`);
+  log("Book of Magic skipped (already in the world):", skipped);
+  return { created, updated, skipped };
+}
+
+/* ------------------------------------------------------------------ */
 /*  The window                                                         */
 /* ------------------------------------------------------------------ */
 
@@ -172,6 +227,7 @@ class AbilityForgeApp extends ApplicationV2 {
     const gm = game.user.isGM ? `
         <button type="button" class="af-toggle" data-act="preview" aria-pressed="${s.preview}" title="See it the way a player does">Player view</button>
         ${actor && !s.preview ? `<button type="button" class="af-toggle" data-act="allMagic" aria-pressed="${s.allMagic}" title="Show magic this character cannot use">All magic</button>` : ""}
+        <button type="button" class="af-icon" data-act="addBom" title="Add the Book of Magic to this world: new schools, mage professions and spells as items"><i class="fa-solid fa-book-medical"></i></button>
         <button type="button" class="af-icon" data-act="reload" title="Reload the catalogue"><i class="fa-solid fa-rotate"></i></button>` : "";
     return `
       <div class="af-bar">
@@ -253,6 +309,7 @@ class AbilityForgeApp extends ApplicationV2 {
     if (d.act === "preview") { s.preview = !s.preview; return this.render(); }
     if (d.act === "allMagic") { s.allMagic = !s.allMagic; return this.render(); }
     if (d.act === "reload") { catalogue = null; return this.render(); }
+    if (d.act === "addBom") return addBookOfMagic();
     if (d.id) {
       if (d.jump) {
         const atlas = await loadAtlas();

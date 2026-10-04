@@ -24,7 +24,17 @@ class ApplicationV2 {
   }
   async close() { this.#s = 0; }
 }
-globalThis.foundry = { applications: { api: { ApplicationV2 } } };
+let confirmed = 0;
+globalThis.foundry = { applications: { api: { ApplicationV2, DialogV2: { confirm: async () => (confirmed++, true) } } } };
+
+// World items and folders, for "Add the Book of Magic".
+const worldItems = [], folders = [];
+let nid = 0;
+globalThis.Folder = { create: async (d) => { const f = { id: `f${++nid}`, ...d, folder: d.folder ? folders.find((x) => x.id === d.folder) : null }; folders.push(f); return f; } };
+globalThis.Item = {
+  createDocuments: async (list) => list.map((d) => { const i = { id: `i${++nid}`, ...d }; worldItems.push(i); return i; }),
+  updateDocuments: async (list) => list.map((u) => Object.assign(worldItems.find((i) => i.id === u._id), u))
+};
 
 // Settings
 const store = {}, registered = {};
@@ -37,6 +47,9 @@ globalThis.game = {
     set: async (m, k, v) => { store[k] = v; }
   },
   modules: new Map([["ability-forge", {}]]),
+  i18n: { localize: (k) => (k === "DoD.spell.general" ? "General" : k) },
+  items: worldItems,
+  folders,
   actors: null
 };
 
@@ -87,6 +100,24 @@ assert.ok(app.lastHTML.includes("Nobody (show everything)"), "the GM can look at
 assert.ok(app.lastHTML.includes("Player view"), "the GM can preview the player view");
 assert.ok(!app.lastHTML.includes(">Troll<"), "monsters are not in the character list");
 
+// GM adds the Book of Magic to the world: once creates, twice refreshes; the core set's own copy is left alone.
+assert.ok(app.lastHTML.includes('data-act="addBom"'), "the GM has the Book of Magic button");
+worldItems.push({ id: "core1", name: "Mend", type: "spell", flags: {}, system: { school: "Animism" } });
+let res = await api.addBookOfMagic();
+assert.equal(confirmed, 1, "asks first");
+assert.ok(res.created > 10 && res.updated === 0);
+assert.ok(res.skipped.includes("Mend"));
+assert.equal(worldItems.filter((i) => i.name === "Mend").length, 1);
+assert.ok(worldItems.some((i) => i.type === "profession" && i.name === "Demonologist"), "character creation can now offer a demonologist");
+const chillItem = worldItems.find((i) => i.name === "Chill");
+assert.equal(folders.find((f) => f.id === chillItem.folder).name, "Necromancy");
+assert.equal(folders.find((f) => f.id === chillItem.folder).folder.name, "Book of Magic");
+const count = worldItems.length;
+res = await api.addBookOfMagic({ confirm: false });
+assert.equal(res.created, 0);
+assert.equal(worldItems.length, count, "re-running makes no duplicates");
+assert.equal(folders.filter((f) => f.name === "Book of Magic").length, 1);
+
 // GM switches on All magic: every school appears.
 app.af.allMagic = true; await app.render();
 assert.ok(app.lastHTML.includes('data-tab="animism"'));
@@ -103,7 +134,10 @@ await api.open(vessa);
 assert.match(warnings[0] ?? "", /only open it for your own characters/);
 app = await api.open();
 assert.equal(app.af.actorId, "a2", "opens on the player's own character");
-assert.ok(!app.lastHTML.includes("Player view") && !app.lastHTML.includes("Nobody"), "no GM controls");
+assert.ok(!app.lastHTML.includes("Player view") && !app.lastHTML.includes("Nobody") && !app.lastHTML.includes("addBom"), "no GM controls");
+warnings.length = 0;
+await api.addBookOfMagic();
+assert.match(warnings[0] ?? "", /only the GM/);
 assert.ok(!app.lastHTML.includes('data-tab="necromancy"'), "no schools for a non-mage");
 store.playersCanOpen = false;
 warnings.length = 0;

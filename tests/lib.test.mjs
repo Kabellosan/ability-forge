@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createAtlas, gistId, schoolIdOf, canonSkill, spread } from "../scripts/lib.mjs";
+import { createAtlas, gistId, schoolIdOf, canonSkill, spread, rangeOf, castingTimeOf, durationOf, damageOf, spellItem, spellSchool, bookOfMagicItems, BOM_PROFESSIONS } from "../scripts/lib.mjs";
 import { catalogue, necromancer, ranger } from "./fixture.mjs";
 
 const A = createAtlas(catalogue);
@@ -74,5 +74,46 @@ for (let i = 1; i < row.length; i++) {
   const same = row.filter((o, j) => j !== i && o.dy === row[i].dy);
   assert.ok(same.every((o) => Math.abs(o.x - row[i].x) >= 56), "stars on the same line keep their distance");
 }
+
+// ---- Book of Magic → Dragonbane items
+assert.equal(schoolIdOf("Performance", [...catalogue.schools, { id: "harmonism", name: "Harmonism" }]), "harmonism", "harmonists cast with Performance");
+assert.equal(spellSchool("GENERAL MAGIC", "General"), "General");
+assert.equal(spellSchool("HARMONISM"), "Performance");
+assert.equal(spellSchool("NECROMANCY"), "Necromancy");
+assert.deepEqual(rangeOf("20 meters (sphere)"), { rangeType: "sphere", range: 20, areaOfEffect: "sphere" });
+assert.deepEqual(rangeOf("10 meters"), { rangeType: "range", range: 10, areaOfEffect: "none" });
+assert.deepEqual(rangeOf("1 kilometer"), { rangeType: "range", range: 1000, areaOfEffect: "none" });
+assert.equal(rangeOf("Touch").rangeType, "touch");
+assert.equal(rangeOf("Personal/touch").rangeType, "personal");
+assert.equal(castingTimeOf("Action/stretch/shift"), "action", "power level 1 value");
+assert.equal(castingTimeOf("Round"), "special");
+assert.equal(durationOf("Concentration"), "concentration");
+assert.equal(durationOf("One day per power level"), "special");
+assert.equal(durationOf(undefined), "instant");
+assert.deepEqual(damageOf("The bolt deals 2D6 damage. Each power level beyond the first increases the damage by D6."), { damage: "2D6", damagePerPowerlevel: "D6" });
+assert.deepEqual(damageOf("You heal a friend for 2D8 HP. For each power level beyond the first, the spell heals an additional D8 HP."), { damage: "-2D8", damagePerPowerlevel: "D8" });
+assert.deepEqual(damageOf("The target takes 2D4 damage."), { damage: "", damagePerPowerlevel: "" }, "no per-level die stated: leave it to the text");
+const chill = spellItem({ ...catalogue.magic.find((m) => m.id === "necromancy.chill"), requirement: "Word", castingTime: "Action", range: "10 meters", duration: "Instant" });
+assert.equal(chill.type, "spell");
+assert.equal(chill.system.school, "Necromancy");
+assert.equal(chill.system.prerequisite, "Necromancy");
+assert.equal(chill.system.range, 10);
+assert.equal(chill.system.description, "<p>Cold fingers.</p>");
+assert.equal(chill.flags["ability-forge"].id, "necromancy.chill");
+const hush = spellItem(catalogue.magic.find((m) => m.id === "necromancy.hush"));
+assert.equal(hush.system.rank, 0);
+assert.equal(hush.system.memorized, true, "tricks are always prepared");
+assert.equal(spellItem({ id: "a.r", kind: "recipe", name: "Brew", school: "ALCHEMY", rank: 1, text: "x", ingredients: "a root" }).system.castingTime, "special");
+const bom = bookOfMagicItems(catalogue, { has: (type, name) => type === "spell" && name === "Mend" });
+assert.ok(bom.skipped.includes("Mend"), "a spell the world already has stays untouched");
+assert.ok(!Object.values(bom.groups).flat().some((i) => i.name === "Mend"));
+assert.equal(bom.groups.Necromancy.length, 5);
+assert.equal(bom.groups["General Magic"].length, 2);
+assert.ok(bom.groups.Mages.some((i) => i.type === "skill" && i.name === "Demonology" && i.system.skillType === "magic"));
+const necro = bom.groups.Mages.find((i) => i.type === "profession" && i.name === "Necromancer");
+assert.ok(necro.system.skills.startsWith("Necromancy, "), "the school is a trained skill of the profession");
+assert.equal(necro.system.attribute, "wil");
+for (const p of BOM_PROFESSIONS) assert.equal(p.skills.length, 8, `${p.name}: eight profession skills`);
+for (const i of bom.groups.Mages) assert.ok(!/undefined/.test(JSON.stringify(i)), i.name);
 
 console.log("lib.test: ok");

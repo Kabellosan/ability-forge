@@ -40,6 +40,16 @@ Characters are read from their sheets: skill items, heroic ability items and spe
 
 Players open it for their own characters (switch off in settings). The GM can pick any character or nobody, preview the player view, and show all magic.
 
+## Book of Magic in your world
+
+Character creation tools and the Dragonbane sheet only know a school of magic once it exists as world items. The GM's book button in the Ability Forge window (or `game.modules.get("ability-forge").api.addBookOfMagic()`) builds them from the catalogue, in an Items folder **Book of Magic**:
+
+- a magic skill for each new school (Demonology, Illusionism, Necromancy, Symbolism, Witchcraft, Alchemy, Enchanting, Dracomancy);
+- a profession for each school a new character can start in (Demonologist, Illusionist, Necromancer, Symbolist, Witch, Alchemist, Enchanter, and *Bard (Harmonist)*), with the book's suggested starting skills, so a character creation tool that lists world professions offers them;
+- every spell, trick, recipe and enchantment in the catalogue as a spell item. Harmonism spells carry the school *Performance*, because harmonists cast with that skill.
+
+Items the world already has under the same name (say, the core set's spells) are left alone. Running it again refreshes what it made before and adds nothing twice. Starting spells are still picked by hand: drag three rank 1 spells and three tricks onto the sheet.
+
 ## Tools (for building a catalogue)
 
 `tools/` holds the scripts that build the author's catalogue: a parser for the rulebook text, an exporter for homebrew kept in an Obsidian vault, and a view prototype. Book text and campaign data stay in `private/` and `data/`, which are never committed.

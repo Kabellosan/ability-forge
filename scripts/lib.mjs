@@ -41,6 +41,7 @@ export function schoolIdOf(school, schools) {
   const s = String(school ?? "").trim();
   if (!s) return null;
   if (s === "DoD.spell.general" || /^general/i.test(s)) return "general-magic";
+  if (/^performance$/i.test(s)) return "harmonism";     // harmonists cast with PERFORMANCE (see SPELL_SCHOOL)
   const id = slug(s);
   return schools.some((x) => x.id === id) ? id : null;
 }
@@ -544,4 +545,137 @@ export function createAtlas(catalogue) {
     constellations: (ctx) => { use(ctx); return constellations(); },
     layoutSky: (tab, W, ctx) => { use(ctx); return layoutSky(tab, W); }
   };
+}
+
+/* ------------------------------------------------------------------ */
+/*  Book of Magic → world items                                        */
+/* ------------------------------------------------------------------ */
+// The character creation tool and the sheet read professions, school skills and spells as plain
+// world items, so a school "exists" in Foundry once these items do. Skill lists are the Book of
+// Magic's suggested starting skills (names only); every description here is our own words.
+
+const SPELL_NOTE = "Starts with three rank 1 spells and three magic tricks from this school or general magic.";
+export const BOM_SCHOOL_SKILLS = ["Demonology", "Illusionism", "Necromancy", "Symbolism", "Witchcraft", "Alchemy", "Enchanting", "Dracomancy"];
+export const BOM_PROFESSIONS = [
+  { name: "Demonologist", school: "Demonology", attribute: "wil",
+    skills: ["Demonology", "Bartering", "Bluffing", "Evade", "Languages", "Myths & Legends", "Persuasion", "Sneaking"],
+    note: `${SPELL_NOTE} Expect suspicion, or worse, in civilized lands.` },
+  { name: "Illusionist", school: "Illusionism", attribute: "wil",
+    skills: ["Illusionism", "Bartering", "Bluffing", "Evade", "Performance", "Persuasion", "Sleight of Hand", "Sneaking"], note: SPELL_NOTE },
+  { name: "Necromancer", school: "Necromancy", attribute: "wil",
+    skills: ["Necromancy", "Awareness", "Bluffing", "Healing", "Languages", "Myths & Legends", "Sneaking", "Spot Hidden"],
+    note: `${SPELL_NOTE} Expect suspicion, or worse, in civilized lands.` },
+  { name: "Symbolist", school: "Symbolism", attribute: "wil",
+    skills: ["Symbolism", "Awareness", "Crafting", "Evade", "Myths & Legends", "Sleight of Hand", "Sneaking", "Spot Hidden"], note: SPELL_NOTE },
+  { name: "Witch", school: "Witchcraft", attribute: "wil",
+    skills: ["Witchcraft", "Awareness", "Beast Lore", "Bluffing", "Healing", "Myths & Legends", "Persuasion", "Sneaking"], note: SPELL_NOTE },
+  { name: "Alchemist", school: "Alchemy", attribute: "wil",
+    skills: ["Alchemy", "Bartering", "Beast Lore", "Bushcraft", "Healing", "Myths & Legends", "Sleight of Hand", "Spot Hidden"],
+    note: "Alchemists learn recipes instead of spells. Starts with three rank 1 recipes and three magic tricks." },
+  { name: "Enchanter", school: "Enchanting", attribute: "wil",
+    skills: ["Enchanting", "Bartering", "Crafting", "Hammers", "Knives", "Myths & Legends", "Sleight of Hand", "Spot Hidden"],
+    note: "Needs CRAFTING 12 to learn Enchanting, also at character creation. One piece of starting gear may carry an enchantment." },
+  { name: "Bard (Harmonist)", school: "Harmonism", attribute: "cha",
+    skills: ["Performance", "Acrobatics", "Bluffing", "Evade", "Knives", "Languages", "Myths & Legends", "Persuasion"],
+    note: "A bard who knows harmonism: instead of the Musician heroic ability, starts with three rank 1 harmonism spells and three harmonism tricks. Harmonism is cast with PERFORMANCE and cannot learn general magic." }
+];
+
+const title = (s) => cap(s).replace(/\b(Of|And|The)\b/g, (w) => w.toLowerCase()).replace(/^./, (c) => c.toUpperCase());
+
+/** The catalogue's school (e.g. "NECROMANCY") → the school string a Dragonbane spell item carries. */
+export function spellSchool(catSchool, generalName = "General") {
+  const s = String(catSchool ?? "").toUpperCase();
+  if (s === "GENERAL MAGIC") return generalName;
+  if (s === "HARMONISM") return "Performance";        // not a skill of its own: the sheet rolls PERFORMANCE
+  return title(s);
+}
+
+/** "Action/stretch/shift" → "action": the power level 1 value, if the system knows it. */
+function pick(raw, allowed, fallback) {
+  const first = String(raw ?? "").trim().toLowerCase().split(/[\/ ,(]/)[0];
+  return allowed.includes(first) ? first : fallback;
+}
+export const castingTimeOf = (raw, fallback = "action") => raw ? pick(raw, ["action", "reaction", "stretch", "shift"], "special") : fallback;
+export const durationOf = (raw, fallback = "instant") => raw ? pick(raw, ["instant", "round", "stretch", "shift", "concentration", "permanent"], "special") : fallback;
+
+/** "20 meters (sphere)" → { rangeType: "sphere", range: 20, areaOfEffect: "sphere" }. */
+export function rangeOf(raw) {
+  const r = String(raw ?? "").trim().toLowerCase();
+  if (!r) return { rangeType: "range", range: 0, areaOfEffect: "none" };      // unknown: the sheet shows "-"
+  if (r.startsWith("touch")) return { rangeType: "touch", range: 0, areaOfEffect: "none" };
+  if (r.startsWith("personal")) return { rangeType: "personal", range: 0, areaOfEffect: "none" };
+  const m = /^(\d+)\s*(meters?|m|kilometers?|km)\b/.exec(r);
+  const range = m ? Number(m[1]) * (/^k/.test(m[2]) ? 1000 : 1) : 0;
+  const shape = /\((sphere|cone)\)/.exec(r)?.[1];
+  return shape ? { rangeType: shape, range, areaOfEffect: shape } : { rangeType: "range", range, areaOfEffect: "none" };
+}
+
+/** Damage or healing dice, only when the text states both the base and the per-power-level die plainly. */
+export function damageOf(text) {
+  const t = String(text ?? "").replace(/\s+/g, " ");
+  const heal = /\bheals? [^.]*?\b(\d)D(\d+) HP/i.exec(t);
+  const hurt = /\b(?:inflicts?|inflicting|takes?|suffers?|deals?)\b[^.]*?\b(\d)D(\d+)\b(?: \w+)? damage/i.exec(t);
+  const hit = heal && (!hurt || heal.index < hurt.index) ? heal : hurt;
+  if (!hit) return { damage: "", damagePerPowerlevel: "" };
+  const die = hit[2];
+  const per = new RegExp(`(?:power level[^.]*?(?:additional|another|by)|(?:additional|another) D${die}[^.]*?power level)[^.]*?\\bD${die}\\b|\\bD${die}\\b[^.]*?per power level`, "i");
+  if (!per.test(t)) return { damage: "", damagePerPowerlevel: "" };
+  return { damage: `${hit === heal ? "-" : ""}${hit[1]}D${die}`, damagePerPowerlevel: `D${die}` };
+}
+
+export const textToHTML = (text) => String(text ?? "").split(/\n+/).map((l) => l.trim()).filter(Boolean)
+  .map((l) => `<p>${esc(l)}</p>`).join("");
+
+/** One catalogue magic entry → a Dragonbane spell item's data (tricks are rank 0, recipes and enchantments ride along as spells). */
+export function spellItem(e, generalName = "General") {
+  const school = spellSchool(e.school, generalName);
+  const rank = e.kind === "trick" ? 0 : Number(e.rank) || 0;
+  const odd = e.kind === "recipe" || e.kind === "enchantment";     // brewed or crafted, not cast: the text says how long
+  const extra = [e.ingredients && `Ingredients: ${e.ingredients}`, e.cost && `Cost: ${e.cost}`].filter(Boolean);
+  return {
+    name: e.name,
+    type: "spell",
+    system: {
+      description: textToHTML([...extra, e.text].join("\n")),
+      school,
+      rank,
+      prerequisite: e.prerequisite?.raw || (rank === 0 ? school : ""),
+      requirement: e.requirement ?? "",
+      castingTime: castingTimeOf(e.castingTime, odd ? "special" : "action"),
+      ...rangeOf(e.range),
+      duration: durationOf(e.duration, odd ? "special" : "instant"),
+      ...damageOf(e.text),
+      memorized: rank === 0
+    },
+    flags: { "ability-forge": { id: e.id, source: e.source ?? "book-of-magic" } }
+  };
+}
+
+export const schoolSkillItem = (name) => ({
+  name, type: "skill",
+  system: { description: "", skillType: "magic", attribute: "int", value: 0, advance: 0, hideTrained: false },
+  flags: { "ability-forge": { id: `skill.${slug(name)}`, source: "book-of-magic" } }
+});
+
+export const professionItem = (p) => ({
+  name: p.name, type: "profession",
+  system: { description: `<p>${esc(p.note)}</p><p><em>Book of Magic, ${esc(p.school)}.</em></p>`, attribute: p.attribute, skills: p.skills.join(", "), abilities: "" },
+  flags: { "ability-forge": { id: `profession.${slug(p.name)}`, source: "book-of-magic" } }
+});
+
+/**
+ * Everything the Book of Magic adds, as item data grouped by folder.
+ * `has(type, name)` says whether the world already holds an item of that name that isn't ours (core set copies stay untouched).
+ */
+export function bookOfMagicItems(catalogue, { generalName = "General", has = () => false } = {}) {
+  const groups = { Mages: [] }, skipped = [];
+  for (const n of BOM_SCHOOL_SKILLS) has("skill", n) ? skipped.push(n) : groups.Mages.push(schoolSkillItem(n));
+  for (const p of BOM_PROFESSIONS) has("profession", p.name) ? skipped.push(p.name) : groups.Mages.push(professionItem(p));
+  for (const e of catalogue.magic ?? []) {
+    if (e.source && e.source !== "book-of-magic") continue;
+    if (has("spell", e.name)) { skipped.push(e.name); continue; }
+    const folder = title(e.school);
+    (groups[folder] ??= []).push(spellItem(e, generalName));
+  }
+  return { groups, skipped };
 }
